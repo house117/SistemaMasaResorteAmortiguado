@@ -28,7 +28,7 @@ public class Graficadora {
         frame.setBounds(200, 200, 580, 680);
         frame.setLayout(new BorderLayout());
         //plano = new plano();
-        planoEm = new planoEmulador();
+        //planoEm = new planoEmulador();
         //Crear metodo en plano de graficar solo un punto
         //Luego llamar a todo esto en el método graficar de nuestro programita
         //Y enviar un arrayList de los puntos a graficar, luego hacemos otro método graficar tabla

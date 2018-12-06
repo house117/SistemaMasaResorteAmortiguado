@@ -6,6 +6,7 @@
 package view;
 
 import controller.plano;
+import controller.planoEmulador;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.FlowLayout;
@@ -14,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -68,12 +70,13 @@ public class MainFrame extends JFrame {
     JLabel titulo;
     JLabel titulo2;
     public Double arr[][];
+
     public MainFrame(Double arr[][]) {
         super("Sistema Masa Resorte Amortiguado By House & Dany");
         super.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         super.setLayout(new BorderLayout());
-        super.setSize(500, 400);
+        super.setSize(500, 440);
         pnlCentro = new JPanel();
         pnlCentro.setLayout(new FlowLayout(FlowLayout.LEFT));
         pnlIzq = new JPanel();
@@ -89,7 +92,7 @@ public class MainFrame extends JFrame {
         lblx0 = new JLabel("Posición/elongacion inicial:");
         lblv0 = new JLabel("Velocidad inicial:");
         lbltInicial = new JLabel("Tiempo Inicial:");
-        lbltInicial = new JLabel("Delay de animación:");
+        lblDelay = new JLabel("Delay de animación (milisecs):");
         //creamos textFields
         txtH = new JTextField(10);
         txtW = new JTextField(10);
@@ -114,6 +117,8 @@ public class MainFrame extends JFrame {
         pnlIzq.add(txtV0);
         pnlIzq.add(lbltInicial);
         pnlIzq.add(txtTiempoInicial);
+        pnlIzq.add(lblDelay);
+        pnlIzq.add(txtDelay);
 
         //Creamos botones
         btnObtenerGrafica = new JButton("Obtener Gráfica");
@@ -124,7 +129,7 @@ public class MainFrame extends JFrame {
                         || txtV0.getText().isEmpty() || txtTiempoInicial.getText().isEmpty()) {
                     JOptionPane.showMessageDialog(MainFrame.this, "¡Falta algún dato!, asegúrate de ingresar todos los datos", "Error entrada de datos", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    /*double h = obtenerNumero(txtH.getText()); //pasito pasito suave suaveciito
+                    double h = obtenerNumero(txtH.getText()); //pasito pasito suave suaveciito
                     double w0 = obtenerNumero(txtW.getText()); //frecuencia para las oscilaciones
                     double g = obtenerNumero(txtG.getText()); //Coeficiente de amortiguamiento
                     double t = obtenerNumero(txtT.getText()); //punto final a resolver de la ED
@@ -132,9 +137,9 @@ public class MainFrame extends JFrame {
                     double x0 = obtenerNumero(txtX0.getText()); //elongación (posición) inicial
                     double v0 = obtenerNumero(txtV0.getText()); //velocidad inicial
                     Estado estado = new Estado(obtenerNumero(txtTiempoInicial.getText()), x0, v0); //estado inicial
-                    int delay = Integer.parseInt(String.format("%.0f", obtenerNumero(txtDelay)));*/
-                    
-                    double h = 0.01; //pasito pasito suave suaveciito
+                    int delay = Integer.parseInt(String.format("%.0f", obtenerNumero(txtDelay.getText())));
+
+                    /*double h = 0.01; //pasito pasito suave suaveciito
                     double w0 = 5.0; //frecuencia para las oscilaciones
                     double g = 0.5;
                     double t = 10.0; //punto final a resolver de la ED
@@ -142,8 +147,7 @@ public class MainFrame extends JFrame {
                     double x0 = 1.5; //elongación (posición) inicial
                     double v0 = 0.0; //velocidad inicial
                     int delay = 5;
-                    Estado estado = new Estado(0.0, x0, v0); //estado inicial
-                    
+                    Estado estado = new Estado(0.0, x0, v0); //estado inicial*/
                     JFrame frame = new JFrame();
                     frame.setDefaultCloseOperation(Ventana.EXIT_ON_CLOSE);
                     frame.setBounds(200, 200, 900, 680);
@@ -151,16 +155,20 @@ public class MainFrame extends JFrame {
                     plano plano = new plano(delay);
                     frame.add(plano, BorderLayout.CENTER);
                     JButton start = new JButton("Volver a ver");
-                    
+
                     frame.add(start, BorderLayout.SOUTH);
                     frame.setVisible(true);
-                    int tam = Integer.parseInt(String.format("%.0f", (t/h)));
+                    int tam = Integer.parseInt(String.format("%.0f", (t / h)));
                     MainFrame.this.arr = new Double[2][tam];
+                    System.out.println("Resultados: ");
                     for (int i = 0; i < t / h; i++) {
                         OsciladorAmortiguado osciladorAmortiguado = new OsciladorAmortiguado(h, g, w0);
                         osciladorAmortiguado.resolver(estado);
-                        MainFrame.this.arr[0][i] = estado.t*50;
-                        MainFrame.this.arr[1][i] = estado.x*50;
+                        MainFrame.this.arr[0][i] = estado.t * 50;
+                        MainFrame.this.arr[1][i] = estado.x * 50;
+                        System.out.println("X (elongación): " + estado.x);
+                        System.out.println("T (tiempo): " + estado.t);
+                        System.out.println("V (velocidad): " + estado.v);
                     }
                     System.out.println("Se termino de resolver");
                     plano.graficarArray(plano.getGraphics(), MainFrame.this.arr);
@@ -173,12 +181,209 @@ public class MainFrame extends JFrame {
                         }
                     });
                     //plano.graficarArray(plano.getGraphics(), MainFrame.this.arr);
-                    
+
                 }
             }
         });
         btnObtenerEmulacion = new JButton("Obtener Emulación");
+        btnObtenerEmulacion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (txtH.getText().isEmpty() || txtG.getText().isEmpty() || txtW.getText().isEmpty() || txtT.getText().isEmpty() || txtX0.getText().isEmpty()
+                        || txtV0.getText().isEmpty() || txtTiempoInicial.getText().isEmpty()) {
+                    JOptionPane.showMessageDialog(MainFrame.this, "¡Falta algún dato!, asegúrate de ingresar todos los datos", "Error entrada de datos", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    double h = obtenerNumero(txtH.getText()); //pasito pasito suave suaveciito
+                    double w0 = obtenerNumero(txtW.getText()); //frecuencia para las oscilaciones
+                    double g = obtenerNumero(txtG.getText()); //Coeficiente de amortiguamiento
+                    double t = obtenerNumero(txtT.getText()); //punto final a resolver de la ED
+                    //Ingresamos la posicion inicial
+                    double x0 = obtenerNumero(txtX0.getText()); //elongación (posición) inicial
+                    double v0 = obtenerNumero(txtV0.getText()); //velocidad inicial
+                    Estado estado = new Estado(obtenerNumero(txtTiempoInicial.getText()), x0, v0); //estado inicial
+                    int delay = Integer.parseInt(String.format("%.0f", obtenerNumero(txtDelay.getText())));
+
+                    /*double h = 0.01; //pasito pasito suave suaveciito
+                    double w0 = 5.0; //frecuencia para las oscilaciones
+                    double g = 0.5;
+                    double t = 10.0; //punto final a resolver de la ED
+                    //Ingresamos la posicion inicial
+                    double x0 = 1.5; //elongación (posición) inicial
+                    double v0 = 0.0; //velocidad inicial
+                    int delay = 5;
+                    Estado estado = new Estado(0.0, x0, v0); //estado inicial*/
+                    JFrame frame = new JFrame();
+                    frame.setDefaultCloseOperation(Ventana.EXIT_ON_CLOSE);
+                    frame.setBounds(200, 200, 580, 680);
+                    frame.setLayout(new BorderLayout());
+                    planoEmulador plano = new planoEmulador(delay, x0 * 50);
+                    frame.add(plano, BorderLayout.CENTER);
+                    JButton start = new JButton("Volver a ver");
+
+                    frame.add(start, BorderLayout.SOUTH);
+                    frame.setVisible(true);
+                    int tam = Integer.parseInt(String.format("%.0f", (t / h)));
+                    MainFrame.this.arr = new Double[2][tam];
+                    System.out.println("Resultados: ");
+                    for (int i = 0; i < t / h; i++) {
+                        OsciladorAmortiguado osciladorAmortiguado = new OsciladorAmortiguado(h, g, w0);
+                        osciladorAmortiguado.resolver(estado);
+                        System.out.println("X (elongación): " + estado.x);
+                        System.out.println("T (tiempo): " + estado.t);
+                        System.out.println("V (velocidad): " + estado.v);
+                        MainFrame.this.arr[0][i] = estado.t * 100;
+                        MainFrame.this.arr[1][i] = estado.x * 100;
+
+                    }
+                    System.out.println("Se termino de resolver");
+                    //plano.emular(plano.getGraphics(), MainFrame.this.arr);
+                    plano.setArr(MainFrame.this.arr);
+
+                    start.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            //plano.removeAll();
+                            plano.emular(plano.getGraphics(), MainFrame.this.arr);
+                        }
+                    });
+                    plano.emular(plano.getGraphics(), MainFrame.this.arr);
+                    //plano.graficarArray(plano.getGraphics(), MainFrame.this.arr);
+
+                }
+            }
+        });
         btnGraficaYEmulacion = new JButton("Obtener Gráfica y Emulación");
+        btnGraficaYEmulacion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (txtH.getText().isEmpty() || txtG.getText().isEmpty() || txtW.getText().isEmpty() || txtT.getText().isEmpty() || txtX0.getText().isEmpty()
+                                || txtV0.getText().isEmpty() || txtTiempoInicial.getText().isEmpty() || txtDelay.getText().isEmpty()) {
+                            JOptionPane.showMessageDialog(MainFrame.this, "¡Falta algún dato!, asegúrate de ingresar todos los datos", "Error entrada de datos", JOptionPane.WARNING_MESSAGE);
+                        } else {
+                            double h = obtenerNumero(txtH.getText()); //pasito pasito suave suaveciito
+                            double w0 = obtenerNumero(txtW.getText()); //frecuencia para las oscilaciones
+                            double g = obtenerNumero(txtG.getText()); //Coeficiente de amortiguamiento
+                            double t = obtenerNumero(txtT.getText()); //punto final a resolver de la ED
+                            //Ingresamos la posicion inicial
+                            double x0 = obtenerNumero(txtX0.getText()); //elongación (posición) inicial
+                            double v0 = obtenerNumero(txtV0.getText()); //velocidad inicial
+                            Estado estado = new Estado(obtenerNumero(txtTiempoInicial.getText()), x0, v0); //estado inicial
+                            int delay = Integer.parseInt(String.format("%.0f", obtenerNumero(txtDelay.getText())));
+
+                            /* double h = 0.01; //pasito pasito suave suaveciito
+                            double w0 = 5.0; //frecuencia para las oscilaciones
+                            double g = 0.5;
+                            double t = 10.0; //punto final a resolver de la ED
+                            //Ingresamos la posicion inicial
+                            double x0 = 1.5; //elongación (posición) inicial
+                            double v0 = 0.0; //velocidad inicial
+                            int delay = 5;
+                            Estado estado = new Estado(0.0, x0, v0); //estado inicial*/
+                            JFrame frame = new JFrame();
+                            frame.setDefaultCloseOperation(Ventana.EXIT_ON_CLOSE);
+                            frame.setBounds(200, 200, 900, 680);
+                            frame.setLayout(new BorderLayout());
+                            plano plano = new plano(delay);
+                            frame.add(plano, BorderLayout.CENTER);
+                            JButton start = new JButton("Volver a ver");
+
+                            frame.add(start, BorderLayout.SOUTH);
+                            frame.setVisible(true);
+                            int tam = Integer.parseInt(String.format("%.0f", (t / h)));
+                            Double arr[][] = new Double[2][tam];
+                            System.out.println("Resultados: ");
+                            for (int i = 0; i < t / h; i++) {
+                                OsciladorAmortiguado osciladorAmortiguado = new OsciladorAmortiguado(h, g, w0);
+                                osciladorAmortiguado.resolver(estado);
+                                arr[0][i] = estado.t * 50;
+                                arr[1][i] = estado.x * 50;
+                                System.out.println("X (elongación): " + estado.x);
+                                System.out.println("T (tiempo): " + estado.t);
+                                System.out.println("V (velocidad): " + estado.v);
+                            }
+                            System.out.println("Se termino de resolver");
+                            plano.graficarArray(plano.getGraphics(), arr);
+                            plano.setArr(arr);
+                            start.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    plano.removeAll();
+                                    plano.graficarArray(plano.getGraphics(), arr);
+                                }
+                            });
+                            //plano.graficarArray(plano.getGraphics(), MainFrame.this.arr);
+
+                        }
+                    }
+                }).start();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (txtH.getText().isEmpty() || txtG.getText().isEmpty() || txtW.getText().isEmpty() || txtT.getText().isEmpty() || txtX0.getText().isEmpty()
+                                || txtV0.getText().isEmpty() || txtTiempoInicial.getText().isEmpty()) {
+                            JOptionPane.showMessageDialog(MainFrame.this, "¡Falta algún dato!, asegúrate de ingresar todos los datos", "Error entrada de datos", JOptionPane.WARNING_MESSAGE);
+                        } else {
+                            double h = obtenerNumero(txtH.getText()); //pasito pasito suave suaveciito
+                            double w0 = obtenerNumero(txtW.getText()); //frecuencia para las oscilaciones
+                            double g = obtenerNumero(txtG.getText()); //Coeficiente de amortiguamiento
+                            double t = obtenerNumero(txtT.getText()); //punto final a resolver de la ED
+                            //Ingresamos la posicion inicial
+                            double x0 = obtenerNumero(txtX0.getText()); //elongación (posición) inicial
+                            double v0 = obtenerNumero(txtV0.getText()); //velocidad inicial
+                            Estado estado = new Estado(obtenerNumero(txtTiempoInicial.getText()), x0, v0); //estado inicial
+                            int delay = Integer.parseInt(String.format("%.0f", obtenerNumero(txtDelay.getText())));
+
+                            /*double h = 0.01; //pasito pasito suave suaveciito
+                            double w0 = 5.0; //frecuencia para las oscilaciones
+                            double g = 0.5;
+                            double t = 10.0; //punto final a resolver de la ED
+                            //Ingresamos la posicion inicial
+                            double x0 = 1.5; //elongación (posición) inicial
+                            double v0 = 0.0; //velocidad inicial
+                            int delay = 5;
+                            Estado estado = new Estado(0.0, x0, v0); //estado inicial*/
+                            JFrame frame = new JFrame();
+                            frame.setDefaultCloseOperation(Ventana.EXIT_ON_CLOSE);
+                            frame.setBounds(780, 200, 580, 680);
+                            frame.setLayout(new BorderLayout());
+                            planoEmulador plano = new planoEmulador(delay, x0 * 50);
+                            frame.add(plano, BorderLayout.CENTER);
+                            JButton start = new JButton("Volver a ver");
+
+                            frame.add(start, BorderLayout.SOUTH);
+                            frame.setVisible(true);
+                            int tam = Integer.parseInt(String.format("%.0f", (t / h)));
+                            MainFrame.this.arr = new Double[2][tam];
+                            System.out.println("Resultados: ");
+                            for (int i = 0; i < t / h; i++) {
+                                OsciladorAmortiguado osciladorAmortiguado = new OsciladorAmortiguado(h, g, w0);
+                                osciladorAmortiguado.resolver(estado);
+                                MainFrame.this.arr[0][i] = estado.t * 100;
+                                MainFrame.this.arr[1][i] = estado.x * 100;
+                                System.out.println("X (elongación): " + estado.x);
+                                System.out.println("T (tiempo): " + estado.t);
+                                System.out.println("V (velocidad): " + estado.v);
+                            }
+                            System.out.println("Se termino de resolver");
+                            //plano.emular(plano.getGraphics(), MainFrame.this.arr);
+                            plano.setArr(MainFrame.this.arr);
+                            start.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    //plano.removeAll();
+                                    plano.emular(plano.getGraphics(), MainFrame.this.arr);
+                                }
+                            });
+                            //plano.graficarArray(plano.getGraphics(), MainFrame.this.arr);
+
+                        }
+                    }
+                }).start();
+            }
+        });
 
         //agregando botones a pnl Derecho
         pnlDer.add(btnObtenerGrafica);
@@ -212,6 +417,7 @@ public class MainFrame extends JFrame {
             resultado = num / denom;
             System.out.println("Valor es: " + resultado);
         } else {
+            System.out.println("cadena es: " + cadena);
             resultado = Double.parseDouble(cadena);
         }
         return resultado;
